@@ -191,16 +191,13 @@ url = "https://github.com/FortinetCloudCSE"
 weight = 10
 
 [[menu.shortcuts]]
-name = "<i class='fas fa-tools'></i> Fortinet Standard Workshop Guide"
-url = "https://fortinetcloudcse.github.io/UserRepo"
+name = "<i class='fas fa-tools'></i> Fortinet OCI Solutions Docs Page"
+url = "https://docs.fortinet.com/cloud-solutions/oci"
 weight = 20
 
 [[menu.shortcuts]]
-name = "<i class='fas fa-tools'></i> Fortinet Standard Workshop Template Repo"
-url = "https://github.com/FortinetCloudCSE/UserRepo"
+name = "<i class='fas fa-tools'></i> EMEA OCI Solutions Github"
+url = "https://github.com/40net-cloud/fortinet-oci-solutions/tree/main"
 weight = 30
 
-[[menu.shortcuts]]
-name = "<i class='fas fa-tools'></i> Fortinet Hugo reLearn theme - Guide"
-url = "https://mcshelby.github.io/hugo-theme-relearn/index.html"
-weight = 40
+
