@@ -1,8 +1,8 @@
 {
-  "repoName":"UserRepo",
-  "author":"Jeff Kopko",
-  "workshopTitle":"Hugo for Fortinet TECWorkshops",
-  "themeVariant":"Workshop",
+  "repoName":"OCI_Solutions",
+  "author":"Derrick Gooch",
+  "workshopTitle":"OCI_Solutions",
+  "themeVariant":"UseCase",
   "logoBannerText":"",
   "logoBannerSubText":"",
   "errorLevel":"warning",
@@ -16,22 +16,18 @@
     "weight":10
   },
   {
-    "text": "Fortinet Standard Workshop Guide",
-    "URL": "https://fortinetcloudcse.github.io/UserRepo",
+    "text": "Fortinet OCI Solutions Docs Page",
+    "URL": "https://docs.fortinet.com/cloud-solutions/oci",
     "icon": "fa-tools",
     "weight":20
   },
   {
-    "text": "Fortinet Standard Workshop Template Repo",
-    "URL": "https://github.com/FortinetCloudCSE/UserRepo",
+    "text": "EMEA OCI Solutions Github",
+    "URL": "https://github.com/40net-cloud/fortinet-oci-solutions/tree/main",
     "icon": "fa-tools",
     "weight":30
-  },
-  {
-    "text": "Fortinet Hugo reLearn theme - Guide",
-    "URL": "https://mcshelby.github.io/hugo-theme-relearn/index.html",
-    "icon": "fa-tools",
-    "weight":40
   }
   ]
 }
+
+

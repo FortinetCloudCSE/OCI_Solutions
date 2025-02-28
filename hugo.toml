@@ -1,7 +1,7 @@
 # this is a required setting for this theme to appear on https://themes.gohugo.io/
 # change this to a value appropriate for you; if your site is served from a subdirectory
 # set it like "https://example.com/mysite/"
-baseURL = "https://fortinetcloudcse.github.io/UserRepo"
+baseURL = "https://fortinetcloudcse.github.io/OCI_Solutions"
 
 languageCode = "en-US"
 defaultContentLanguage = "en"
@@ -23,7 +23,7 @@ uglyURLs = true     # true -> basic/index.html -> basic.html
 # use this theme ;-)
 theme = ["hugo-theme-relearn"]
 
-title = "Hugo for Fortinet TECWorkshops"
+title = "OCI_Solutions"
 
 # We disable this for testing the exampleSite; you must do so too
 # if you want to use the themes parameter disableGeneratorVersion=true;
@@ -182,7 +182,7 @@ enableEmoji = true
 
   [params.author]
   # Author of the site, will be used in meta information
-    name = "Jeff Kopko"
+    name = "Derrick Gooch"
 
 
 [[menu.shortcuts]]
@@ -199,5 +199,3 @@ weight = 20
 name = "<i class='fas fa-tools'></i> EMEA OCI Solutions Github"
 url = "https://github.com/40net-cloud/fortinet-oci-solutions/tree/main"
 weight = 30
-
-
