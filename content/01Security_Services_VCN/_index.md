@@ -4,8 +4,6 @@ menuTitle: "Security Services"
 weight: 10
 ---
 
-# FortiGate and FortiWeb OCI Deployment
-
 ## Introduction
 
 This document is designed to help readers understand deployment of FortiGate and FortiWeb in OCI. It will describe VCN network setup and routing requirements necessary to deploy FortiGate in parallel with FortiWeb in a “Security Services VCN” within Oracle Cloud Infrastructure (OCI).
