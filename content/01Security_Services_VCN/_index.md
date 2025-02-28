@@ -1,7 +1,7 @@
 ---
-title: "FortiGate and FortiWeb"
-menuTitle: "FortiGate_FortiWeb"
-weight: 20
+title: "Security Services VCN"
+menuTitle: "Security Services"
+weight: 10
 ---
 
 # FortiGate and FortiWeb OCI Deployment
