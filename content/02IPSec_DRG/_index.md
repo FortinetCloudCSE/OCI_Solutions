@@ -56,7 +56,7 @@ You will then need to provide information about the two tunnels that will be set
 
 Once the configuration is done, you will be able to see the status of the tunnels
 
-![IPSec Conn](ipsec_conn.png)
+![IPSec Conn](ipsec_con.png)
 
 Figure 3: IPSec Connection
 
@@ -102,7 +102,7 @@ Figure 4: Edit Attachment
 
 ## On-Prem FortiGate
 
-This section will discuss how to configure IPSec on the FortiGate.  In our case, we are running a FortiGate FG-70F, but these configurations will be the same for all fortigate devices.
+This section will discuss how to configure IPSec on the FortiGate.  In our case, we are running a FortiGate FG-70F, but these configurations will be the same for all fortigate devices.  We will be showing CLI commands in this document, because largely these commands don't change a lot across releases.  However, all of these things can be configured via GUI.
 
 ### FortiGate IPSec Configuration
 
@@ -162,7 +162,6 @@ config system interface
         set ip 10.77.77.1 255.255.255.255
         set type tunnel
         set remote-ip 10.77.77.2 255.255.255.252
-        set snmp-index 25
         set interface "wan1"
     next
     edit "OCI-2"
@@ -170,9 +169,33 @@ config system interface
         set ip 10.77.77.5 255.255.255.255
         set type tunnel
         set remote-ip 10.77.77.6 255.255.255.252
-        set snmp-index 26
         set interface "wan1"
     next 
+end
+
+```
+
+#### FortiGate Policy Configuration
+
+On FortiGate, IPSec tunnels will not come up unless there is a firewall policy associated with it.  Below is an example FortiGate Policy.
+
+```sh
+
+config firewall policy
+edit 11
+        set name "Lab to AWS"
+        set srcintf "LAB-OOB"
+        set dstintf "OCI-1" "OCI-2"
+        set action accept
+        set srcaddr "internal-1"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set utm-status enable
+        set ssl-ssh-profile "custom-deep-inspection"
+        set ips-sensor "default"
+        set nat enable
+    next
 end
 
 ```
@@ -202,6 +225,77 @@ config router bgp
 
 ```
 
-### FortiGate BGP Configuration
+#### FortiGate BGP Outputs
 
+Below are some sample outputs from FortiGate showing the resulting BGP Peering relationship and routes.
 
+```sh
+
+FortiGate-70F #    get router info routing-table bgp
+Routing table for VRF=0
+B       10.0.0.0/24 [20/0] via 10.77.77.2 (recursive via OCI-1 tunnel <Tunnel1 IP>), 02:21:54
+                    [20/0] via 10.77.77.6 (recursive via OCI-2 tunnel <Tunnel2 IP>), 02:21:54
+B       172.16.140.0/22 [20/0] via 10.77.77.6 (recursive via OCI-2 tunnel <Tunnel2 IP>), 23:49:15
+                        [20/0] via 10.77.77.2 (recursive via OCI-1 tunnel <Tunnel1 IP>), 23:49:15
+B       172.16.144.0/28 [20/0] via 10.77.77.2 (recursive via OCI-1 tunnel <Tunnel1 IP>), 02:21:54
+                        [20/0] via 10.77.77.6 (recursive via OCI-2 tunnel <Tunnel2 IP>), 02:21:54
+B       172.16.144.32/28 [20/0] via 10.77.77.6 (recursive via OCI-2 tunnel <Tunnel2 IP>), 02:21:54
+                         [20/0] via 10.77.77.2 (recursive via OCI-1 tunnel <Tunnel1 IP>), 02:21:54
+B       172.16.145.0/28 [20/0] via 10.77.77.6 (recursive via OCI-2 tunnel <Tunnel2 IP>), 02:21:54
+                        [20/0] via 10.77.77.2 (recursive via OCI-1 tunnel <Tunnel1 IP>), 02:21:54
+
+FortiGate-70F # get router info bgp summary 
+VRF 0 BGP router identifier 192.168.74.1, local AS number 65501
+BGP table version is 22
+2 BGP AS-PATH entries
+0 BGP community entries
+
+Neighbor   V         AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.77.77.2 4      31898   89492  102019       21    0    0 23:57:32        6
+10.77.77.6 4      31898   89477  102029       21    0    0 1d16h09m        6
+
+Total number of neighbors 2
+
+FortiGate-70F # get router info bgp neighbors 10.77.77.2 received-routes
+VRF 0 BGP table version is 22, local router ID is 192.168.74.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal
+Origin codes: i - IGP, e - EGP, ? - incomplete
+
+   Network          Next Hop            Metric LocPrf Weight RouteTag Path
+*> 0.0.0.0/0        10.77.77.2                             0        0 31898 i <-/->
+*> 10.0.0.0/24      10.77.77.2                             0        0 31898 i <-/->
+*> 172.16.140.0/22  10.77.77.2                             0        0 31898 i <-/->
+*> 172.16.144.0/28  10.77.77.2                             0        0 31898 i <-/->
+*> 172.16.144.32/28 10.77.77.2                             0        0 31898 i <-/->
+*> 172.16.145.0/28  10.77.77.2                             0        0 31898 i <-/->
+
+Total number of prefixes 6
+
+FortiGate-70F # get router info bgp neighbors 10.77.77.2 advertised-routes
+VRF 0 BGP table version is 22, local router ID is 192.168.74.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal
+Origin codes: i - IGP, e - EGP, ? - incomplete
+
+   Network          Next Hop            Metric LocPrf Weight RouteTag Path
+*> 10.77.77.1/32    10.77.77.1                         32768        0 ? <-/->
+*> 10.77.77.5/32    10.77.77.1                         32768        0 ? <-/->
+*> 10.85.86.0/24    10.77.77.1                         32768        0 ? <-/->
+*> 10.255.1.0/24    10.77.77.1                         32768        0 ? <-/->
+*> 10.255.11.0/24   10.77.77.1                         32768        0 ? <-/->
+*> 10.255.12.0/24   10.77.77.1                         32768        0 ? <-/->
+*> 10.255.13.0/24   10.77.77.1                         32768        0 ? <-/->
+*> 172.16.140.0/22  10.77.77.1                             0        0 31898 i <-/->
+*> 172.16.144.32/28 10.77.77.1                             0        0 31898 i <-/->
+*> 172.16.145.0/28  10.77.77.1                             0        0 31898 i <-/->
+*> 192.168.1.0      10.77.77.1                         32768        0 ? <-/->
+*> 192.168.74.0     10.77.77.1                         32768        0 ? <-/->
+
+Total number of prefixes 12
+
+```
+
+#### OCI BGP Outputs
+
+In OCI, navigate to **Networking > Customer connectivity > Site-to-Site VPN > Home-FG > "<Tunnel Number>"**.  ON the left side of the page, you can click on "BGP routes received" or "BGP routes advertised" to get route information.
+
+![OCI Recieved Routes](oci_rr.png)
