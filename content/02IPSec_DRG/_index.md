@@ -4,7 +4,7 @@ menuTitle: "FortiGate IPSec to DRG"
 weight: 20
 ---
 
-## Introduction
+## Problem Statement
 
 This Document will help readers to configure Point to Point IPSec tunnels between FortiGate and OCI DRG.  While terminating IPSec between on-prem and FortiGate VM in OCI is a more common architecture, some customers choose to use their Cloud FortiGates for Outbound and East/West traffic only.  The below diagram is from the previous solution guide discussing Security Services VCN.  For more detailed information about routing confgiuration, go check it out.
 
