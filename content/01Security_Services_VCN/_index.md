@@ -81,7 +81,7 @@ Figure 2: Hub to DRG attachment
 
 #### DRG Route Table
 
-Every attachment must have a DRG Route Table explicitly defined. You can re-use the same route table across multiple VCN attachments.
+Every attachment must have a DRG Route Table explicitly defined. You can re-use the same route table across multiple VCN attachments. 
 
 The below table is for the Security Services (hub) VCN attachment. Note that all of the routes here are Dynamic. These are the result of adding a Route Distribution Rule, which Matches all routes known to the DRG.
 
