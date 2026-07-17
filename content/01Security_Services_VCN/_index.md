@@ -8,7 +8,7 @@ weight: 10
 
 Fortinet provides cloud security solutions for OCI and other public cloud providers.  OCI uses the Dynamic Routing Gateway (DRG) to provide inter-VCN connectivity as well as connectivity for on-prem resources to OCI VCN.  This document is designed to help readers understand deployment of FortiGate in OCI. It will describe VCN network setup and routing requirements necessary to deploy FortiGate in a “Security Services VCN” within Oracle Cloud Infrastructure (OCI).  FortiGate helps customers instert full Next Generation Firewall services to secure North/South and East/West traffic in OCI.  In addition to this, customers use FortiGate to provide ZTNA and SD-WAN cloud on-ramp.
 
-![environment](env.svg)
+![environment](env.png)
 
 Figure 1: OCI Sample Environment
 
