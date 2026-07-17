@@ -6,7 +6,7 @@ weight: 10
 
 ## Problem Statement
 
-Fortinet provides cloud security solutions for OCI and other public cloud providers.  OCI uses the Dynamic Routing Gateway (DRG) to provide inter-VCN connectivity as well as connectivity for on-prem resources to OCI VCN.  This document is designed to help readers understand deployment of FortiGate and FortiWeb in OCI. It will describe VCN network setup and routing requirements necessary to deploy FortiGate in parallel with FortiWeb in a “Security Services VCN” within Oracle Cloud Infrastructure (OCI).  FortiGate helps customers instert full Next Generation Firewall services to secure North/South and East/West traffic in OCI.  In addition to this, customers use FortiGate to provide ZTNA and SD-WAN cloud on-ramp.  FortiWeb is a fully functional Web Application and API security platform.
+Fortinet provides cloud security solutions for OCI and other public cloud providers.  OCI uses the Dynamic Routing Gateway (DRG) to provide inter-VCN connectivity as well as connectivity for on-prem resources to OCI VCN.  This document is designed to help readers understand deployment of FortiGate in OCI. It will describe VCN network setup and routing requirements necessary to deploy FortiGate in a “Security Services VCN” within Oracle Cloud Infrastructure (OCI).  FortiGate helps customers instert full Next Generation Firewall services to secure North/South and East/West traffic in OCI.  In addition to this, customers use FortiGate to provide ZTNA and SD-WAN cloud on-ramp.
 
 ![environment](env.svg)
 
@@ -18,7 +18,7 @@ It is useful to explain how traffic will flow in this environment. The above dia
 
 ### Security Services VCN
 
-In our diagram, we only picture FortiGate and FortiWeb in the Security Services VCN. Depending on the customer’s requirement, you could also deploy FortiManager and FortiAnalyzer here. As we will remember, those services only require IP reachability to the managed resources, meaning that we could potentially place them on-prem or in another cloud location.
+In our diagram, we only picture FortiGate in the Security Services VCN. Depending on the customer’s requirement, you could also deploy other Fortinet products, including FortiManager, FortiAnalyzer and FortiWeb here. 
 
 Unless otherwise stated, we will use regional subnets in OCI. This greatly simplifies routing and HA across availability domains.
 
@@ -154,25 +154,18 @@ Figure 4: Edit Attachment
 
 Figure 5 below gives a big picture view of the resulting route tables.
 
-![Big Picture](big_picture.svg)
+![Big Picture](drg_rt.png)
 
 Figure 5: Routing Big Picture
 
 # Fortinet Services
 
-For this document, we will only focus on deployment of FortiGate and FortiWeb.
+For this document, we will only focus on deployment of FortiGate.
 
 ## FortiGate
 
-In our diagram, FortiGates are deployed between two OCI network load balancers (NLB). The external NLB has a public IP Address, which will be used to accept and distribute inbound traffic from remote users. The internal load balancer in this architecture will distribute both Northbound and East/West Traffic to the FortiGates for inspection. FortiGate could also be used in conjunction with FortiClient EMS and/or FortiSASE to provide secured (ZTNA, IPsec, SSL VPN) remote access to users.
+For this example architecture, we are looking at Active/Passive FortiGates.  These are deployed across two Availability Domains.  We will be using the "SDN Failover" method, which means that upon failure of the primary FortiGate, the secondary FortiGate takes over, by sending and API call to OCI which moves the secondary IP address associated with the trust and untrust interfaces on the current primary to the secondary (new primary) FortiGate.
 
-The use of NLB facilitates both Active/Active (A/A) and Active/Passive (A/P) FortiGate Deployment. The decision between A/A and A/P is dependent on required features. If horizontal scaling is needed, A/A is the indicated architecture. If IPsec tunnels will be terminated directly on FortiGate, A/P is recommended.
-
----
-
-**NAT note**: In most cases customers will deploy FortiGate policies for the trust interface which use Source NAT (SNAT) based on the outbound interface IP. This is useful, in A/A deployments to ensure that return traffic for a session is processed by the same FortiGate. In some cases, customers would like to preserve the Source IP of the packets. In this case, SNAT can be disabled on FortiGate. Customers will need to enable Symmetric Hash on the internal network load balancer, in order to ensure traffic is returned to the correct FortiGate.
-
----
 
 ### FortiGate Routing Tables
 
@@ -200,9 +193,9 @@ We will be using the metadata IAM for this example. This uses the device ID of t
 
 The below example shows “Advanced Type”, wich allows us to specify multiple server region types and compartments.
 
-![Fortigate SDN Conn](fgt_sdn.png)
-![Fortigate SDN Conn 2](fgt_sdn2.png)
-![Fortigate SDN Conn 3](fgt_sdn3.png)
+![FortiGate SDN Conn](fgt_sdn.png)
+![FortiGate SDN Conn 2](fgt_sdn2.png)
+![FortiGate SDN Conn 3](fgt_sdn3.png)
 Figure 6: FortiGate SDN Connector Configuration
 
 #### OCI Policy Configuration
@@ -221,6 +214,21 @@ After the Group is configured, you must create or modify a policy, which grants 
 
 Figure 8: OCI Policy
 
+---
+
+**Policy note**: The above pictured policy is overly permissive. This is fine for a lab, but **not** recommended for production. Below are the required minimum privileges:
+
+Allow dynamic-group <group_name> to read compartments in tenancy
+Allow dynamic-group <group_name> to read instances in tenancy
+Allow dynamic-group <group_name> to read vnic-attachments in tenancy
+Allow dynamic-group <group_name> to read private-ips in tenancy
+Allow dynamic-group <group_name> to read public-ips in tenancy
+Allow dynamic-group <group_name> to manage private-ips in tenancy
+Allow dynamic-group <group_name> to manage public-ips in tenancy
+Allow dynamic-group <group_name> to manage vnics in tenancy
+
+---
+
 #### FortiGate Dynamic Address Object
 
 Once the connector is up and functioning properly, users can configure dynamic address objects under Policy & Objects > Addresses. There are a number of filters to choose from when creating the object. In the example below, a free form tag is used to identify our application. It is more common to tag groups of devices based on administrative and security requirements.
@@ -235,28 +243,12 @@ Once the configuration is complete, you can hover over the address and view a li
 
 Figure 10: Verify Address Object
 
-## FortiWeb
-
-Fortiweb will be deployed in reverse proxy mode, protecting an application in the App 1 VCN from threats on the Internet. For A/A and horizontal scaling, either an external Network Load Balancer or Application Load Balancer can be used to distribute traffic to FortiWeb. Because FortiWeb is serving as a reverse proxy, traffic to the application server (or internal load balancer) will be SNAT based on the trust interface of FortiWeb. This ensures that return traffic is sent to the appropriate device.
-
----
-
-**Routing note**: In the below section discussing VCN routing table, we will see that there is a default route pointing all traffic inbound from DRG to internal network load balancer (and then to FortiGate). Because of SNAT of FortiWeb traffic, a more specific route to the Trust subnet CIDR exists, and thus traffic will be forwarded directly back to FortiWeb
-
----
-
-Table 10: FortiWeb Routing Table
-
-| Destination | Target Type | Target | Route Type |
-| --- | --- | --- | --- |
-| 0.0.0.0/0 | Interface | Untrust Interface | Static |
-| &lt;App IP or CIDR&gt; | Interface | Trust Interface | Static |
 
 ## Useful Links
 
 FortiGate OCI deployment guide:
 
-<https://docs.fortinet.com/document/fortigate-public-cloud/7.4.0/oci-administration-guide/16658/about-fortigate-vm-for-oci>
+<https://docs.fortinet.com/document/FortiGate-public-cloud/7.4.0/oci-administration-guide/16658/about-FortiGate-vm-for-oci>
 
 Terraform deployment templates:
 
