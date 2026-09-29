@@ -253,3 +253,4 @@ FortiGate OCI deployment guide:
 Terraform deployment templates:
 
 <https://github.com/40net-cloud/fortinet-oci-solutions/tree/main>
+
