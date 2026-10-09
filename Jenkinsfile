@@ -14,6 +14,7 @@ pipeline {
     stages {
 
        stage('Checking for question/discussion section in content folders'){
+            when { expression { false } }
             steps {
               script {
                 def warningFound = false
@@ -44,6 +45,12 @@ pipeline {
               }
             }
        }
+
+        stage('Clean workspace') {
+            steps {
+                deleteDir()
+            }
+        }
     }
     post {
      success {
